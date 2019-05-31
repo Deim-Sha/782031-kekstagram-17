@@ -1,7 +1,7 @@
 # Личный проект «Кекстаграм» [![Build status][travis-image]][travis-url]
 
 * Студент: [Малянова Екатерина](https://up.htmlacademy.ru/javascript/17/user/782031).
-* Наставник: `Неизвестно`.
+* Наставник: `Кексобот`.
 
 ---
 
