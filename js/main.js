@@ -75,5 +75,130 @@ var fragment = document.createDocumentFragment();
 for (var j = 0; j < PHOTOS_NUMBER; j++) {
   fragment.appendChild(renderPhoto(photos[j]));
 }
-
 photosContainer.appendChild(fragment);
+
+// Показывает и закрывает окно редактирования фотографии
+var ESC_KEYCODE = 27;
+
+var photoUploadControl = document.querySelector('#upload-file');
+var photoEditor = document.querySelector('.img-upload__overlay');
+var photoEditorClose = photoEditor.querySelector('#upload-cancel');
+var photoPreview = photoEditor.querySelector('.img-upload__preview');
+
+var onPopupEscPress = function (evt) {
+  if (evt.keyCode === ESC_KEYCODE) {
+    closePopup();
+  }
+};
+
+var closePopup = function () {
+  photoEditor.classList.add('hidden');
+  document.removeEventListener('keydown', onPopupEscPress);
+  photoUploadControl.value = '';
+  photoPreview.classList.remove('effects__preview--' + currentEffect);
+};
+
+photoUploadControl.addEventListener('change', function () {
+  photoEditor.classList.remove('hidden');
+  document.addEventListener('keydown', onPopupEscPress);
+  scaleValue.value = SCALE_MAX + '%';
+  effectsList.querySelector('#effect-none').checked = true;
+  effectLevel.classList.add('hidden');
+});
+
+photoEditorClose.addEventListener('click', closePopup);
+
+// Изменяет масштаб фотографии
+var SCALE_STEP = 25;
+var SCALE_MIN = 25;
+var SCALE_MAX = 100;
+var scaleValue = photoEditor.querySelector('.scale__control--value');
+var scaleControlDown = photoEditor.querySelector('.scale__control--smaller');
+var scaleControlUp = photoEditor.querySelector('.scale__control--bigger');
+
+scaleControlDown.addEventListener('click', function () {
+  var scaleDown = parseInt(scaleValue.value, 10) - SCALE_STEP;
+
+  if (scaleDown < SCALE_MIN) {
+    scaleDown = SCALE_MIN;
+  }
+
+  scaleValue.value = scaleDown + '%';
+  photoPreview.style.transform = 'scale(' + scaleDown / 100 + ')';
+});
+
+scaleControlUp.addEventListener('click', function () {
+  var scaleUp = parseInt(scaleValue.value, 10) + SCALE_STEP;
+
+  if (scaleUp > SCALE_MAX) {
+    scaleUp = SCALE_MAX;
+  }
+
+  scaleValue.value = scaleUp + '%';
+  photoPreview.style.transform = 'scale(' + scaleUp / 100 + ')';
+});
+
+// Накладывает эффект на фотографию
+var EFFECT_VALUE_DEFAULT = 100;
+var EFFECTS_LEVEL_MAX = {
+  chrome: 1,
+  sepia: 1,
+  marvin: 100,
+  phobos: 3,
+  heat: 3
+};
+var FILTERS_DEFAULT = {
+  none: '',
+  chrome: 'grayscale(1)',
+  sepia: 'sepia(1)',
+  marvin: 'invert(100%)',
+  phobos: 'blur(3px)',
+  heat: 'brightness(3)'
+};
+var effectsList = photoEditor.querySelector('.effects__list');
+var effectLevel = photoEditor.querySelector('.effect-level');
+var effectLevelValue = effectLevel.querySelector('.effect-level__value');
+var effectLevelLine = effectLevel.querySelector('.effect-level__line');
+var effectLevelPin = effectLevelLine.querySelector('.effect-level__pin');
+var effectLevelDepth = effectLevelLine.querySelector('.effect-level__depth');
+var currentEffect = 'none';
+
+effectsList.addEventListener('change', function (evt) {
+  photoPreview.classList.remove('effects__preview--' + currentEffect);
+
+  if (evt.target.value === 'none') {
+    effectLevel.classList.add('hidden');
+  } else {
+    effectLevel.classList.remove('hidden');
+    photoPreview.classList.add('effects__preview--' + evt.target.value);
+    effectLevelValue.value = EFFECT_VALUE_DEFAULT;
+    effectLevelPin.style.left = EFFECT_VALUE_DEFAULT + '%';
+    effectLevelDepth.style.width = EFFECT_VALUE_DEFAULT + '%';
+  }
+
+  currentEffect = evt.target.value;
+  photoPreview.style.filter = FILTERS_DEFAULT[currentEffect];
+});
+
+// Изменяет уровень эффекта
+effectLevelPin.addEventListener('mouseup', function () {
+  var value = EFFECTS_LEVEL_MAX[currentEffect] * ((effectLevelPin.offsetLeft / effectLevelLine.clientWidth).toFixed(2));
+
+  switch (currentEffect) {
+    case 'chrome':
+      photoPreview.style.filter = 'grayscale(' + value + ')';
+      break;
+    case 'sepia':
+      photoPreview.style.filter = 'sepia(' + value + ')';
+      break;
+    case 'marvin':
+      photoPreview.style.filter = 'invert(' + value + '%)';
+      break;
+    case 'phobos':
+      photoPreview.style.filter = 'blur(' + value + 'px)';
+      break;
+    case 'heat':
+      photoPreview.style.filter = 'brightness(' + value + ')';
+      break;
+  }
+});
