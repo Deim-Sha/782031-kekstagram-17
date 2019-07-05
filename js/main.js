@@ -84,9 +84,10 @@ var photoUploadControl = document.querySelector('#upload-file');
 var photoEditor = document.querySelector('.img-upload__overlay');
 var photoEditorClose = photoEditor.querySelector('#upload-cancel');
 var photoPreview = photoEditor.querySelector('.img-upload__preview');
+var photoDescription = photoEditor.querySelector('.text__description');
 
 var onPopupEscPress = function (evt) {
-  if (evt.keyCode === ESC_KEYCODE) {
+  if (evt.keyCode === ESC_KEYCODE && photoDescription !== document.activeElement) {
     closePopup();
   }
 };
